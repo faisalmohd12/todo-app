@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Todo Application</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body {
+            min-height: 100vh;
+            background: #0f172a;
+            font-family: Arial, sans-serif;
+        }
+
+        .todo-container {
+            max-width: 750px;
+            margin: 70px auto;
+        }
+
+        .todo-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        .todo-title {
+            color: #f8fafc;
+            font-size: 40px;
+            font-weight: 700;
+        }
+
+        .todo-subtitle {
+            color: #94a3b8;
+        }
+
+        .input-group {
+            background: #273449;
+            border: 1px solid #3b4a60;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .form-control {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 13px;
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-control:focus {
+            background: transparent;
+            color: white;
+            box-shadow: none;
+        }
+
+        .add-btn {
+            background: #2563eb;
+            border: none;
+            border-radius: 8px;
+            padding: 11px 20px;
+            font-weight: 600;
+        }
+
+        .add-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Daily Progress */
+
+        .progress-section {
+            background: #273449;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 25px;
+        }
+
+        .progress-text {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .progress-percentage {
+            color: #60a5fa;
+            font-weight: 700;
+        }
+
+        .progress {
+            height: 8px;
+            background: #475569;
+            border-radius: 10px;
+        }
+
+        .progress-bar {
+            background: #3b82f6;
+        }
+
+        /* Tasks */
+
+        .tasks-heading {
+            color: #f8fafc;
+            font-weight: 600;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .task-card {
+            background: #273449;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 15px 17px;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+
+        .task-card:hover {
+            border-color: #475569;
+            transform: translateY(-1px);
+        }
+
+        .task-title {
+            color: #f1f5f9;
+            font-size: 16px;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #64748b !important;
+        }
+
+        .done-btn {
+            background: #16a34a;
+            border: none;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+            border: none;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+        /* Empty Tasks */
+
+        .empty-tasks {
+            text-align: center;
+            padding: 25px;
+            background: #273449;
+            border: 1px solid #334155;
+            border-radius: 12px;
+        }
+
+        .empty-tasks-title {
+            color: #cbd5e1;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .empty-tasks-text {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+
+        .footer-text {
+            color: #64748b;
+            text-align: center;
+            margin-top: 25px;
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container todo-container">
+
+    <div class="todo-card">
+
+        <!-- Heading -->
+
+        <h1 class="todo-title text-center">
+            Todo Application
+        </h1>
+
+        <p class="todo-subtitle text-center mb-4">
+            Stay organized. Get things done.
+        </p>
+
+
+        <!-- Add Task -->
+
+        <form action="/task" method="post">
+
+            <div class="input-group">
+
+                <input type="text"
+                       name="title"
+                       class="form-control"
+                       placeholder="What needs to be done?"
+                       required>
+
+                <button type="submit"
+                        class="btn btn-primary add-btn">
+                    + Add Task
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- Daily Progress -->
+
+        <div class="progress-section">
+
+            <div class="d-flex justify-content-between mb-2">
+
+                <span class="progress-text">
+                    Daily Progress
+                </span>
+
+                <span class="progress-percentage"
+                      id="progressPercentage">
+                    0%
+                </span>
+
+            </div>
+
+            <div class="progress">
+
+                <div class="progress-bar"
+                     id="progressBar"
+                     role="progressbar"
+                     style="width: 0%">
+                </div>
+
+            </div>
+
+            <small class="progress-text"
+                   id="progressText">
+                0 of 0 tasks completed
+            </small>
+
+        </div>
+
+
+        <!-- Tasks Heading -->
+
+        <h5 class="tasks-heading">
+            My Tasks
+        </h5>
+
+
+        <!-- No Tasks Message -->
+
+        <div th:if="${#lists.isEmpty(task)}"
+             class="empty-tasks">
+
+            <p class="empty-tasks-title">
+                📝 No tasks added yet
+            </p>
+
+            <p class="empty-tasks-text">
+                Add your first task above!
+            </p>
+
+        </div>
+
+
+        <!-- Task List -->
+
+        <div id="taskList">
+
+            <th:block th:each="task : ${task}">
+
+                <div class="task-card todo-task"
+                     th:attr="data-completed=${task.completed}">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <!-- Task Title -->
+
+                        <span class="task-title"
+                              th:classappend="${task.completed} ? ' completed' : ''"
+                              th:text="${task.title}">
+                            Task Title
+                        </span>
+
+
+                        <!-- Buttons -->
+
+                        <div class="ms-3 d-flex gap-2">
+
+                            <!-- Done / Undo -->
+
+                            <a th:href="@{/task/{id}/toggle(id=${task.id})}"
+                               class="btn btn-success btn-sm done-btn"
+                               th:text="${task.completed} ? 'Undo' : 'Done'">
+                                Done
+                            </a>
+
+
+                            <!-- Delete -->
+
+                            <a th:href="@{/task/{id}/delete(id=${task.id})}"
+                               class="btn btn-danger btn-sm delete-btn">
+                                Delete
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </th:block>
+
+        </div>
+
+
+        <!-- Footer -->
+
+        <p class="footer-text">
+            One task at a time. You've got this!
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- Daily Progress Calculation -->
+
+<script>
+
+    const tasks = document.querySelectorAll(".todo-task");
+
+    let totalTasks = tasks.length;
+    let completedTasks = 0;
+
+    tasks.forEach(task => {
+
+        if (task.dataset.completed === "true") {
+            completedTasks++;
+        }
+
+    });
+
+    let progress = 0;
+
+    if (totalTasks > 0) {
+        progress = Math.round(
+            (completedTasks / totalTasks) * 100
+        );
+    }
+
+    document.getElementById("progressPercentage").innerText =
+        progress + "%";
+
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+
+    document.getElementById("progressText").innerText =
+        completedTasks + " of " + totalTasks + " tasks completed";
+
+</script>
+
+</body>
+</html>
